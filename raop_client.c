@@ -663,17 +663,19 @@ int raopcl_connect(raopcl_t *p, char *host, uint16_t destport, int encrypt, int 
 	base64_encode(raopcld->iv,16,&iv);
 	remove_char_from_string(iv,'=');
 	sprintf(sdp,
-            "v=0\r\n"
-            "o=iTunes %s 0 IN IP4 %s\r\n"
-            "s=iTunes\r\n"
-            "c=IN IP4 %s\r\n"
-            "t=0 0\r\n"
-            "m=audio 0 RTP/AVP 96\r\n"
-            "a=rtpmap:96 AppleLossless\r\n"
-            "a=fmtp:96 %d 0 16 40 10 14 2 255 0 0 44100\r\n"
-            "a=rsaaeskey:%s\r\n"
-            "a=aesiv:%s\r\n",
-            sid, rtspcl_local_ip(raopcld->rtspcl), host, MAX_SAMPLES_IN_CHUNK, key, iv);
+		"v=0\r\n"
+		"o=iTunes %s 0 IN IP4 %s\r\n"
+		"s=iTunes\r\n"
+		"c=IN IP4 %s\r\n"
+		"t=0 0\r\n"
+		"m=audio 0 RTP/AVP 96\r\n"
+		"a=rtpmap:96 AppleLossless\r\n"
+		"a=fmtp:96 %d 0 16 40 10 14 2 255 0 0 44100\r\n",
+		sid, rtspcl_local_ip(raopcld->rtspcl), host, MAX_SAMPLES_IN_CHUNK);
+
+	if (raopcld->encrypt) {
+		sprintf(sdp + strlen(sdp), "a=rsaaeskey:%s\r\na=aesiv:%s\r\n", key, iv);
+	}
 
 	remove_char_from_string(sac,'=');
 	if(rtspcl_add_exthds(raopcld->rtspcl, "Apple-Challenge", sac)) goto erexit;
